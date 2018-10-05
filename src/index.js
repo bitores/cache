@@ -1,4 +1,7 @@
-const chokidar = require('chokidar');
+const {
+  FSWatcher
+} = require('chokidar');
+const path = require('path')
 const {
   readFile,
   writeFile,
@@ -6,96 +9,105 @@ const {
 
 class CacheLib {
   constructor(opt) {
+    if (this instanceof CacheLib === false) return new CacheLib(opt);
     this.namespace = opt.namespace || '__cache__';
-    this.cacheprefix = opt.cacheprefix || '.__cache__.js';
-    this._cwd = opt.cwd || null;
+    this.prefix = opt.prefix || '.__cache__.js';
+    this.base = opt.base || process.cwd();
     this._dirs = [];
     this._files = [];
     this._watchers = [];
+    this._parts = {};
 
-    this.init();
-
+    this._curPart = opt.name || 'root';
+    this._curWatcher = null;
   }
 
-  init() {
-    let cwd = this._cwd;
-    if (cwd && cwd.length) {
-      this.addDir(cwd);
+  use(name) {
+    return this.useWatcher(name);
+  }
+
+  useWatcher(name) {
+    this._curPart = name;
+    if (this._parts[name] == null) {
+      this._curWatcher = new FSWatcher({
+        ignored: /(^|[\/\\])\../,
+        persistent: true
+      });
+
+      var log = console.log.bind(console);
+      this._curWatcher
+        .on('addDir', path => {
+          log(`Directory ${path} has been added`)
+          this._dirs.push(path)
+        })
+        .on('unlinkDir', path => {
+          log(`Directory ${path} has been removed`)
+        })
+        .on('add', path => {
+          log(`File ${path} has been added`)
+          this._files.push(path)
+        })
+        .on('unlink', path => {
+          log(`File ${path} has been removed`)
+        })
+        .on('change', path => {
+          log(`File ${path} has been changed`)
+        })
+        .on('error', error => {
+          log(`Watcher error: ${error}`)
+        })
+
+      this._parts[name] = this._curWatcher;
+      this.addWatcher(this._curWatcher);
+    }
+
+    this._curWatcher = this._parts[name];
+    console.log(name, this._curWatcher)
+
+    return this;
+  }
+
+  checkWatcher() {
+    if (this._curWatcher === null) {
+      this.useWatcher(this._curPart)
     }
   }
 
   addDir(dir) {
-    let watcher = chokidar.watch(dir, {
-      ignored: /(^|[\/\\])\../,
-      persistent: true
-    });
+    this.checkWatcher()
+    let dirPath = path.resolve(this.base, dir)
+    this._curWatcher.add(dirPath);
+    // this._dirs.push(dirPath);
+    return this;
+  }
 
-    // Full list of options. See below for descriptions. (do not use this example)
-    // chokidar.watch('file', {
-    //   persistent: true,
+  addDirs(dirs) {
+    this.checkWatcher()
+    dirs.map((dir) => {
+      let dirPath = path.resolve(this.base, dir)
+      this._curWatcher.add(dirPath);
+      // this._dirs.push(dirPath);
+    })
 
-    //   ignored: '*.txt',
-    //   ignoreInitial: false,
-    //   followSymlinks: true,
-    //   cwd: '.',
-    //   disableGlobbing: false,
-
-    //   usePolling: true,
-    //   interval: 100,
-    //   binaryInterval: 300,
-    //   alwaysStat: false,
-    //   depth: 99,
-    //   awaitWriteFinish: {
-    //     stabilityThreshold: 2000,
-    //     pollInterval: 100
-    //   },
-
-    //   ignorePermissionErrors: false,
-    //   atomic: true // or a custom 'atomicity delay', in milliseconds (default 100)
-    // });
-
-    var log = console.log.bind(console);
-
-
-    watcher
-      .on('addDir', path => log(`Directory ${path} has been added`))
-      .on('unlinkDir', path => log(`Directory ${path} has been removed`))
-      .on('error', error => log(`Watcher error: ${error}`))
-      .on('ready', () => log('Initial scan complete. Ready for changes'))
-      .on('raw', (event, path, details) => {
-        log('Raw event info:', event, path, details);
-      })
-      .on('all', (event, path) => {
-        console.log(event, path);
-      })
-
-    // watcher.on('change', (path, stats) => {
-    //   if (stats) console.log(`File ${path} changed size to ${stats.size}`);
-    // });
-
-    // Watch new files.
-    // watcher.add('new-file');
-    // watcher.add(['new-file-2', 'new-file-3', '**/other-file*']);
-
-
-
-    this.addWatcher(watcher);
+    return this;
   }
 
   addFile(file) {
-    let watcher = chokidar.watch(file, {
-      ignored: /(^|[\/\\])\../,
-      persistent: true
-    });
+    this.checkWatcher()
+    let filePath = path.resolve(this.base, file)
+    this._curWatcher.add(filePath);
+    // this._files.push(filePath)
+    return this;
+  }
 
-    var log = console.log.bind(console);
-
-    watcher
-      .on('add', path => log(`File ${path} has been added`))
-      .on('change', path => log(`File ${path} has been changed`))
-      .on('unlink', path => log(`File ${path} has been removed`));
-
-    this.addWatcher(watcher);
+  addFiles(files) {
+    this.checkWatcher()
+    files.map(file => {
+      let filePath = path.resolve(this.base, file)
+      this._curWatcher.add(filePath);
+      // this._files.push(filePath)
+    })
+    return this;
   }
 
   addWatcher(watcher) {
@@ -122,12 +134,8 @@ class CacheLib {
     }
   }
 
-  writeCache() {
-
-  }
-
-  readCache() {
-
+  debug() {
+    console.log()
   }
 }
 
