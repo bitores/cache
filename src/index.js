@@ -134,6 +134,10 @@ class CacheLib {
     }
   }
 
+  get watcher() {
+    return this._curWatcher;
+  }
+
   debug() {
     console.log()
   }
