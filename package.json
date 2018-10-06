@@ -1,7 +1,7 @@
 {
-  "name": "cache-loader",
+  "name": "cache",
   "version": "1.0.0",
-  "description": "cache files lib",
+  "description": "cache file path , and cache some variable",
   "main": "src/index.js",
   "directories": {
     "test": "test"

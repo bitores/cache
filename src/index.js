@@ -171,6 +171,7 @@ class Cache {
 
   addKeyValue(k, val) {
     this._cache[k] = val;
+    this.writeFileSync()
   }
 
   get watcher() {
