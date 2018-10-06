@@ -11,7 +11,7 @@ let cache = new Cache({
 cache.addDir('example')
 cache.addFile('file.js')
 
-cache.use('component').addDirs(['example1', 'example1']).addFiles(['file1.js', 'file2.js']);
+cache.use('component').addDirs(['example1', 'example2']).addFiles(['file1.js', 'file2.js']);
 
 cache.watcher.on('change', (path) => {
   // cache.debug()
