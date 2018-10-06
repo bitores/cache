@@ -1,21 +1,18 @@
-let CacheLib = require('../src/index');
+let Cache = require('../src/index');
 let path = require('path');
 
 
-let cache = new CacheLib({
-  namespace: '',
-  prefix: '__cache.js',
-  base: path.resolve(process.cwd(), 'test'),
-  dirs: [],
-  files: []
+let cache = new Cache({
+  namespace: 'LIB',
+  prefix: '.__cache.js',
+  base: path.resolve(process.cwd(), 'test')
 })
 
 cache.addDir('example')
 cache.addFile('file.js')
-cache.debug();
 
-cache.use('component').addDirs(['example1', 'example1']).addFiles(['file1.js', 'file2.js']).debug();
+cache.use('component').addDirs(['example1', 'example1']).addFiles(['file1.js', 'file2.js']);
 
 cache.watcher.on('change', (path) => {
-  console.log("!!! ")
+  // cache.debug()
 })
