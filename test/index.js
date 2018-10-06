@@ -13,6 +13,12 @@ cache.addFile('file.js')
 
 cache.use('component').addDirs(['example1', 'example2']).addFiles(['file1.js', 'file2.js']);
 
+
+cache.addKeyValue('k', 'fff1w1e6r54w6e4r')
+cache.addKeyValue('k1', {
+  a: 3,
+  b: 4
+})
 cache.watcher.on('change', (path) => {
   // cache.debug()
 })

@@ -52,7 +52,6 @@ class Cache {
   }
 
   watcherCallback(eventName, path, name) {
-    console.log(name, eventName)
     let curCache = this._cache[name];
     switch (eventName) {
       case 'addDir':
@@ -170,6 +169,10 @@ class Cache {
     writeFileSync(path.resolve(this._base, this.prefix), `module.exports = ${JSON.stringify(this._cache,undefined,2)}`);
   }
 
+  addKeyValue(k, val) {
+    this._cache[k] = val;
+  }
+
   get watcher() {
     return this._curWatcher.watcher;
   }
@@ -181,6 +184,7 @@ class Cache {
   set base(base) {
     return this._base = base;
   }
+
 
   debug() {
     console.log(this._cache)
