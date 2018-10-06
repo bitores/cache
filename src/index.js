@@ -7,7 +7,7 @@ const Watcher = require('./watcher.js');
 
 class Cache {
   constructor(opt = {}) {
-    if (this instanceof CacheLib === false) return new Cache(opt);
+    if (this instanceof Cache === false) return new Cache(opt);
     this.namespace = opt.namespace || '__cache__';
     this.prefix = opt.prefix || '.__cache__.js';
     this._base = opt.base || process.cwd();
@@ -187,4 +187,4 @@ class Cache {
   }
 }
 
-exports = module.exports = CacheLib;
+exports = module.exports = Cache;
