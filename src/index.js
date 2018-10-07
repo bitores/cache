@@ -1,195 +1,93 @@
-const path = require('path')
 const {
   writeFile,
   writeFileSync,
 } = require('fs');
-const Watcher = require('./watcher.js');
+const path = require('path')
+const NS = require('./ns.js');
+
+const KV = require('./kv.js');
+const FD = require('./file-dir.js');
 
 class Cache {
-  constructor(opt = {}) {
-    if (this instanceof Cache === false) return new Cache(opt);
-    this.namespace = opt.namespace || '__cache__';
-    this.prefix = opt.prefix || '.__cache__.js';
-    this._base = opt.base || process.cwd();
-
-    this._watchers = [];
-    this._parts = {};
-
-    this._curPart = opt.name || '__';
-    this._curWatcher = null;
+  constructor(option = {}) {
+    if (this instanceof Cache === false) return new Cache(option);
+    this.defaultNS = option.defaultNS || 'default';
+    this.watcherOption = option.watcherOption || {};
+    this.prefix = option.prefix || '.__cache__.js';
+    this._base = option.base || process.cwd();
     this._cache = {};
 
-    this._cache[this._curPart] = {
-      dirs: [],
-      files: []
-    };
-    this._curCache = this._cache[this._curPart];
+    this.use(this.defaultNS)
   }
 
-  use(name, option = {}) {
-    return this.useWatcher(name, option);
-  }
+  use(namespace) {
 
-  useWatcher(name, option = {}) {
-    this._curPart = name;
-    if (this._parts[name] == null) {
-      //
-      this._cache[this._curPart] = {
-        dirs: [],
-        files: []
-      };
-
-      this._curWatcher = new Watcher(name, this.watcherCallback.bind(this), option)
-
-      this._parts[name] = this._curWatcher;
-      this.addWatcher(this._curWatcher);
+    if (this._cache.hasOwnProperty(namespace) === false) {
+      this._cache[namespace] = {
+        fd: new FD(namespace, this._base, this.writeFileSync.bind(this), this.watcherOption),
+        kv: new KV(namespace)
+      }
     }
 
-    this._curCache = this._cache[this._curPart];
-    this._curWatcher = this._parts[name];
+    this._curNS = this._cache[namespace];
 
     return this;
   }
 
-  watcherCallback(eventName, path, name) {
-    let curCache = this._cache[name];
-    switch (eventName) {
-      case 'addDir':
-        {
-          let paths = curCache.dirs,
-            index = paths.indexOf(path);
-          if (index === -1) {
-            curCache.dirs.push(path)
-            this.writeFileSync()
-          }
-        }
-        break;
-      case 'unlinkDir':
-        {
-          let paths = curCache.dirs,
-            index = paths.indexOf(path);
-          if (index > -1) {
-            paths.splice(index, 1)
-          }
-          this.writeFileSync()
-        }
-        break;
-      case 'add':
-        {
-          let paths = curCache.files,
-            index = paths.indexOf(path);
-          if (index === -1) {
-            curCache.files.push(path)
-            this.writeFileSync()
-          }
-        }
-        break;
-      case 'unlink':
-        {
-          let paths = curCache.files,
-            index = paths.indexOf(path);
-          if (index > -1) {
-            paths.splice(index, 1)
-          }
-          this.writeFileSync()
-        }
-        break;
-      default:
-        {
-
-        }
-    }
-  }
-
-  checkWatcher() {
-    if (this._curWatcher === null) {
-      this.useWatcher(this._curPart)
-    }
-  }
-
-  resolve(url) {
-    return path.resolve(this._base, url);
-  }
-
-  addDir(dir) {
-    this.checkWatcher()
-    let dirPath = this.resolve(dir)
-    this._curWatcher.add(dirPath);
-
+  addDir(path) {
+    this._curNS['fd'].addDir(path);
     return this;
   }
 
-  addDirs(dirs) {
-    this.checkWatcher()
-    dirs.map((dir) => {
-      let dirPath = this.resolve(dir)
-      this._curWatcher.add(dirPath);
-    })
-
+  addDirs(paths) {
+    this._curNS['fd'].addDirs(paths);
     return this;
   }
 
-  addFile(file) {
-    this.checkWatcher()
-    let filePath = this.resolve(file)
-    this._curWatcher.add(filePath);
-
+  addFile(path) {
+    this._curNS['fd'].addFile(path);
     return this;
   }
 
-  addFiles(files) {
-    this.checkWatcher()
-    files.map(file => {
-      let filePath = this.resolve(file)
-      this._curWatcher.add(filePath);
-    })
-
+  addFiles(paths) {
+    this._curNS['fd'].addFiles(paths);
     return this;
   }
 
-  addWatcher(watcher) {
-    let watchers = this._watchers;
-    if (watchers.indexOf(watcher) < 0) {
-      console.log(watchers.length)
-      watchers.push(watcher)
-    }
-  }
-
-  unWatcher(watcher) {
-    let watchers = this._watchers,
-      index = watchers.indexOf(watcher);
-    if (index > -1) {
-      watchers.splice(index, 1)
-      watcher.close();
-    }
+  addKV(k, v) {
+    this._curNS['kv'].add(k, v);
+    return this;
   }
 
   // write the cache file
   writeFileSync() {
-    writeFileSync(path.resolve(this._base, this.prefix), `module.exports = ${JSON.stringify(this._cache,undefined,2)}`);
+    writeFileSync(path.resolve(this._base, this.prefix), `module.exports = ${JSON.stringify(this.toJson(),undefined,2)}`);
   }
 
-  addKeyValue(k, val) {
-    this._cache[k] = val;
-    this.writeFileSync()
+  toJson() {
+    let ret = {},
+      cache = this._cache;
+    for (let ns in cache) {
+      let _fdCache = cache[ns]['fd'],
+        _kvCache = cache[ns]['kv'];
+
+      ret[ns] = {
+        ..._fdCache.toJson(),
+        ..._kvCache.toJson()
+      }
+    }
+
+    return ret;
   }
 
   get watcher() {
-    return this._curWatcher.watcher;
+    return this._curNS['fd'].watcher;
   }
-
-  get base() {
-    return this._base;
-  }
-
-  set base(base) {
-    return this._base = base;
-  }
-
 
   debug() {
-    console.log(this._cache)
+    console.log(this.toJson())
   }
 }
+
 
 exports = module.exports = Cache;

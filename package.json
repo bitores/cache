@@ -1,5 +1,5 @@
 {
-  "name": "cache",
+  "name": "@huangzj/cache",
   "version": "1.0.0",
   "description": "cache file path , and cache some variable",
   "main": "src/index.js",

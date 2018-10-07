@@ -3,47 +3,46 @@ const {
 } = require('chokidar');
 
 class Watcher {
-  constructor(name, callback, option = {}) {
+  constructor(callback, option = {}) {
 
-    this.name = name;
-    this.option = option;
+    this._option = option;
     this._callback = callback;
 
-    this._watcher = this.init(name, callback);
+    this._watcher = this.init(callback);
   }
 
-  init(name, callback) {
-    let watcher = new FSWatcher(this.option);
-
-    // watcher.on('raw', (event, path, details) => {
-    //   callback(event, path, name)
-    // })
+  init(callback) {
+    let watcher = new FSWatcher(this._option);
 
     watcher
       .on('addDir', path => {
-        callback('addDir', path, name)
+        callback('addDir', path)
       })
       .on('unlinkDir', path => {
-        callback('unlinkDir', path, name)
+        callback('unlinkDir', path)
       })
       .on('add', path => {
-        callback('add', path, name)
+        callback('add', path)
       })
       .on('unlink', path => {
-        callback('unlink', path, name)
+        callback('unlink', path)
       })
       .on('change', path => {
-        callback('change', path, name)
+        callback('change', path)
       })
       .on('error', error => {
-        callback('error', path, name)
+        callback('error', path)
       })
 
     return watcher;
   }
 
-  add(...args) {
+  add(args) {
     this._watcher.add(args)
+  }
+
+  remove(args) {
+    this._watcher.unwatch(args)
   }
 
   close() {
