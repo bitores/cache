@@ -12,6 +12,7 @@
 - addDir(dirpath)
 - addDirs([dirpath])
 - addKV(key, value)
+- toJson()
 - debug()
 
 #### e.g.
