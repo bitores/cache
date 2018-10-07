@@ -4,12 +4,13 @@
 
 #### API
 
-- addFile
-- addFiles
-- addDir
-- addDirs
-- addKeyValue
-- debug
+- use(namespace)
+- addFile(filepath)
+- addFiles([filepath])
+- addDir(dirpath)
+- addDirs([dirpath])
+- addKV(key, value)
+- debug()
 
 #### e.g.
 ```
@@ -34,7 +35,4 @@ cache.addKeyValue('k1', {
   b: 4
 })
 
-cache.watcher.on('change', (path) => {
-  // cache.debug()
-})
 ```
