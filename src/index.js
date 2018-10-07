@@ -18,6 +18,12 @@ class Cache {
     this._cache = {};
 
     this.use(this.defaultNS)
+
+    return new Proxy(this, {
+      set: (val) => {
+        console.log('set...', val)
+      }
+    })
   }
 
   use(namespace) {
