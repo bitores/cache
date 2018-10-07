@@ -1,6 +1,6 @@
 {
   "name": "@huangzj/cache",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "cache file path , and cache some variable",
   "main": "src/index.js",
   "directories": {

@@ -16,7 +16,7 @@
 
 #### e.g.
 ```
-let Cache = require('../src/index');
+let Cache = require('@huangzj/cache');
 let path = require('path');
 
 
