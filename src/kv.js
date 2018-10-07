@@ -10,6 +10,10 @@ class KV extends NS {
     this._kvs[key] = value;
   }
 
+  get(key) {
+    return this._kvs[key];
+  }
+
   toJson() {
     return this._kvs;
   }

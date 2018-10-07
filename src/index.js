@@ -20,8 +20,15 @@ class Cache {
     this.use(this.defaultNS)
 
     return new Proxy(this, {
-      set: (val) => {
-        console.log('set...', val)
+      set: (target, key, value, receiver) => {
+        if (key in target) return target[key] = value;
+        else return target.addKV(key, value);
+      },
+      get: (target, property, receiver) => {
+        if (property in target) {
+          return target[property];
+        }
+        return target.getKV(property);
       }
     })
   }
@@ -65,6 +72,10 @@ class Cache {
     return this;
   }
 
+  getKV(k) {
+    return this._curNS['kv'].get(k)
+  }
+
   // write the cache file
   writeFileSync() {
     writeFileSync(path.resolve(this._base, this.prefix), `module.exports = ${JSON.stringify(this.toJson(),undefined,2)}`);
@@ -87,7 +98,7 @@ class Cache {
   }
 
   get watcher() {
-    return this._curNS['fd'].watcher;
+    return this._curNS['fd'].watcher.watcher;
   }
 
   debug() {
