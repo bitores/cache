@@ -2,6 +2,8 @@
 
 > cache file path , and cache some variable
 
+- npm i --save @huangzj/cache
+
 #### API
 
 - use(namespace)
