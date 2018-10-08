@@ -15,6 +15,7 @@ class Cache {
     this.watcherOption = option.watcherOption || {};
     this.prefix = option.prefix || '.__cache__.js';
     this._base = option.base || process.cwd();
+    this.format = option.format;
     this._cache = {};
 
     this.use(this.defaultNS)
@@ -78,7 +79,9 @@ class Cache {
 
   // write the cache file
   writeFileSync() {
-    writeFileSync(path.resolve(this._base, this.prefix), `module.exports = ${JSON.stringify(this.toJson(),undefined,2)}`);
+    let pre = this.format && this.format(this.toJson);
+    let content = pre ? pre : `module.exports = ${JSON.stringify(this.toJson(),undefined,2)}`;
+    writeFileSync(path.resolve(this._base, this.prefix), content);
   }
 
   toJson() {

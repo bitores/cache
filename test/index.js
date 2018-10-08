@@ -5,7 +5,10 @@ let path = require('path');
 let cache = new Cache({
   namespace: 'LIB',
   prefix: '.__cache.js',
-  base: path.resolve(process.cwd(), 'test')
+  base: path.resolve(process.cwd(), 'test'),
+  format: (data) => {
+
+  }
 })
 
 cache.addDir('example')
