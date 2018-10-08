@@ -3,11 +3,13 @@ let path = require('path');
 
 
 let cache = new Cache({
-  namespace: 'LIB',
+  defaultNS: 'default',
   prefix: '.__cache.js',
   base: path.resolve(process.cwd(), 'test'),
+
   format: (data) => {
 
+    return `module.exports = ${JSON.stringify(data, undefined,2)}`;
   }
 })
 

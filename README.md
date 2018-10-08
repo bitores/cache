@@ -4,6 +4,13 @@
 
 - npm i --save @huangzj/cache
 
+#### config
+
+- defaultNS:
+- prefix:
+- base:
+- format:
+
 #### API
 
 - use(namespace)
@@ -22,9 +29,12 @@ let path = require('path');
 
 
 let cache = new Cache({
-  namespace: 'LIB',
+  defaultNS: 'default',
   prefix: '.__cache.js',
-  base: path.resolve(process.cwd(), 'test')
+  base: path.resolve(process.cwd(), 'test'),
+  format: (data) => {
+    return `module.exports = ${JSON.stringify(data, undefined,2)}`;
+  }
 })
 
 cache.addDir('example')

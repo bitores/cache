@@ -20,6 +20,8 @@ class Cache {
 
     this.use(this.defaultNS)
 
+
+
     return new Proxy(this, {
       set: (target, key, value, receiver) => {
         if (key in target) return target[key] = value;
@@ -41,6 +43,7 @@ class Cache {
         fd: new FD(namespace, this._base, this.writeFileSync.bind(this), this.watcherOption),
         kv: new KV(namespace)
       }
+      this.writeFileSync();
     }
 
     this._curNS = this._cache[namespace];
@@ -79,7 +82,7 @@ class Cache {
 
   // write the cache file
   writeFileSync() {
-    let pre = this.format && this.format(this.toJson);
+    let pre = this.format && this.format(this.toJson());
     let content = pre ? pre : `module.exports = ${JSON.stringify(this.toJson(),undefined,2)}`;
     writeFileSync(path.resolve(this._base, this.prefix), content);
   }
