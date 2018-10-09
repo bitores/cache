@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bitores/cache-loader.git"
+    "url": "git+https://github.com/bitores/cache.git"
   },
   "keywords": [
     "cache",
@@ -21,9 +21,9 @@
   "author": "huangzj",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bitores/cache-loader/issues"
+    "url": "https://github.com/bitores/cache/issues"
   },
-  "homepage": "https://github.com/bitores/cache-loader#readme",
+  "homepage": "https://github.com/bitores/cache#readme",
   "dependencies": {
     "chokidar": "^2.0.4"
   }
